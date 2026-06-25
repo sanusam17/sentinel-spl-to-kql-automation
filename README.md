@@ -1,0 +1,1 @@
+# sentinel-spl-to-kql-automation
