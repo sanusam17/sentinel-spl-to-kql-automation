@@ -34,6 +34,10 @@ jobs:
         python --version
         pip list
         python -c "from google import genai; print('Gemini SDK Loaded Successfully')"
+   
+    - name: Show Script
+      run: |
+        cat scripts/process_all_rules.py
 
     - name: Generate KQL
       env:
