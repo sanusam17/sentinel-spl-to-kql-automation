@@ -1,4 +1,0 @@
-index=azure sourcetype="azure:monitor:activity"
-OperationNameValue="MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
-ActivityStatusValue="Success"
-| stats count by Caller, CallerIpAddress, ResourceGroup
