@@ -1,10 +1,18 @@
-kql = """
-AzureActivity
-| where OperationNameValue =~ "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
-| summarize count() by Caller
+import google.generativeai as genai
+
+genai.configure(api_key="YOUR_GEMINI_API_KEY")
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+prompt = f"""
+Convert this Splunk SPL query to Microsoft Sentinel KQL.
+
+Return ONLY the KQL query.
+
+SPL:
+{spl_query}
 """
 
-with open("kql-rules/rule.kql", "w") as f:
-    f.write(kql)
+response = model.generate_content(prompt)
 
-print("KQL file generated successfully")
+print(response.text)
