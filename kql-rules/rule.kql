@@ -1,0 +1,6 @@
+```kql
+AzureActivity
+| where OperationName == "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
+| where ActivityStatus == "Success"
+| summarize count() by Caller
+```

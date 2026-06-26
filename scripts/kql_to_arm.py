@@ -1,28 +1,30 @@
-from openai import OpenAI
 import os
+from google import genai
 
-client = OpenAI(
-    api_key=os.environ["OPENAI_API_KEY"]
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
-kql = open("kql-rules/rule.kql").read()
+with open("kql-rules/rule.kql", "r") as f:
+    kql_query = f.read()
 
-prompt = open(
-    "prompts/kql_to_arm.txt"
-).read()
+prompt = f"""
+Convert the following Microsoft Sentinel KQL query into a valid
+Microsoft Sentinel Scheduled Analytics Rule ARM template.
 
-response = client.responses.create(
-    model="gpt-5",
-    input=prompt.replace(
-        "{{KQL_QUERY}}",
-        kql
-    )
+Return only JSON.
+
+KQL:
+
+{kql_query}
+"""
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt
 )
 
-arm = response.output_text
+with open("arm-templates/rule.json", "w") as f:
+    f.write(response.text)
 
-with open(
-    "arm-templates/rule.json",
-    "w"
-) as f:
-    f.write(arm)
+print("ARM template generated successfully")
