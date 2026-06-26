@@ -1,8 +1,11 @@
 import os
-import google.generativeai as genai
+from google import genai
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-1.5-pro")
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 def generate(prompt: str) -> str:
-    return model.generate_content(prompt).text.strip()
+    response = client.models.generate_content(
+        model="gemini-1.5-flash",
+        contents=prompt
+    )
+    return response.text.strip()
