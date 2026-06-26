@@ -4,7 +4,7 @@ client = genai.Client(
     api_key="YOUR_GEMINI_API_KEY"
 )
 
-with open("spl-rules/delete_diag_settings.spl", "r") as f:
+with open("spl-rules/rule.spl", "r") as f:
     spl_query = f.read()
 
 prompt = f"""
@@ -26,7 +26,7 @@ response = client.models.generate_content(
 
 kql = response.text
 
-with open("kql-rules/delete_diag_settings.kql", "w") as f:
+with open("kql-rules/rule.kql", "w") as f:
     f.write(kql)
 
 print("KQL generated successfully")
