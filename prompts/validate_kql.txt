@@ -1,0 +1,24 @@
+You are a Senior Detection Engineer.
+
+Review the following Sentinel KQL query.
+
+Check:
+
+- KQL syntax
+- Table mappings
+- Field mappings
+- Detection logic
+- Performance
+
+Respond ONLY with:
+
+PASS
+
+or
+
+FAIL:
+<reason>
+
+KQL:
+
+{KQL_QUERY}

@@ -1,24 +1,27 @@
-You are a Sentinel Content Developer.
+You are a Microsoft Sentinel Content Developer.
 
-Convert the following KQL query into a valid Microsoft Sentinel Scheduled Analytics Rule ARM Template.
+Convert this KQL query into a valid Sentinel Scheduled Analytics Rule ARM template.
 
 Requirements:
 
-- ARM JSON only
-- API version:
+- Valid JSON only
+- Resource type:
   Microsoft.SecurityInsights/alertRules
 
-- Include:
-  displayName
-  severity
-  tactics
-  queryFrequency
-  queryPeriod
-  triggerOperator
-  triggerThreshold
+Populate:
+
+- displayName
+- description
+- severity
+- tactics
+- query
+- queryFrequency
+- queryPeriod
+- triggerOperator
+- triggerThreshold
 
 Return JSON only.
 
 KQL:
 
-{{KQL_QUERY}}
+{KQL_QUERY}

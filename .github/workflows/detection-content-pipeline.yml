@@ -1,0 +1,101 @@
+name: Detection Content Pipeline
+
+on:
+  push:
+    paths:
+      - 'spl-rules/*.spl'
+
+jobs:
+
+  spl_to_kql:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - run: pip install -r requirements.txt
+
+    - name: Generate KQL
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python scripts/process_all_rules.py
+
+    - name: Commit KQL
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add kql-rules/*
+        git commit -m "Generated KQL" || true
+        git push
+
+  engineer_review:
+
+    needs: spl_to_kql
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: Detection-Review
+
+    steps:
+
+    - run: echo "Awaiting Detection Engineer Approval"
+
+  validate_kql:
+
+    needs: engineer_review
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - run: pip install -r requirements.txt
+
+    - name: Validate KQL
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python scripts/validate_kql.py
+
+  generate_arm:
+
+    needs: validate_kql
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - run: pip install -r requirements.txt
+
+    - name: Generate ARM
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python scripts/generate_arm.py
+
+    - name: Commit ARM
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add arm-templates/*
+        git commit -m "Generated ARM Templates" || true
+        git push

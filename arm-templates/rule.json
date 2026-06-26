@@ -1,0 +1,65 @@
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Log Analytics workspace (and Sentinel workspace) the alert rule will be deployed to."
+      }
+    },
+    "alertRuleName": {
+      "type": "string",
+      "defaultValue": "SuccessfulDeletionOfDiagnosticSettings",
+      "metadata": {
+        "description": "Unique name for the scheduled alert rule."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2020-01-01",
+      "name": "[concat(parameters('workspaceName'), '/', parameters('alertRuleName'))]",
+      "location": "[resourceGroup().location]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "Successful Deletion of Diagnostic Settings",
+        "description": "Detects successful attempts to delete diagnostic settings in Azure Activity, which could indicate an attacker attempting to remove logging or a misconfiguration.",
+        "severity": "Medium",
+        "enabled": true,
+        "query": "AzureActivity\n| where OperationName == \"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE\"\n| where ActivityStatus == \"Success\"\n| summarize count() by Caller",
+        "queryFrequency": "PT5M",
+        "queryPeriod": "PT5M",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": true,
+        "tactics": [
+          "Defense Evasion"
+        ],
+        "techniques": [
+          "T1562.001"
+        ],
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "Name",
+                "columnName": "Caller"
+              }
+            ]
+          }
+        ],
+        "alertDetailsOverride": null,
+        "customDetails": null,
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        }
+      }
+    }
+  ]
+}
+```
