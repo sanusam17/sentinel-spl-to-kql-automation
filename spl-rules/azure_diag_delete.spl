@@ -2,3 +2,5 @@ index=azure sourcetype="azure:monitor:activity"
 OperationNameValue="MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
 ActivityStatusValue="Success"
 | stats count by Caller, CallerIpAddress, ResourceGroup
+
+//SPL_Rule_For_Azure_Diagnostic_Rule_Deletion
