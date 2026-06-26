@@ -1,18 +1,32 @@
-import google.generativeai as genai
+from google import genai
 
-genai.configure(api_key="YOUR_GEMINI_API_KEY")
+client = genai.Client(
+    api_key="YOUR_GEMINI_API_KEY"
+)
 
-model = genai.GenerativeModel("gemini-2.5-flash")
+with open("spl-rules/delete_diag_settings.spl", "r") as f:
+    spl_query = f.read()
 
 prompt = f"""
-Convert this Splunk SPL query to Microsoft Sentinel KQL.
+You are a Microsoft Sentinel Engineer.
 
-Return ONLY the KQL query.
+Convert the following Splunk SPL query to Microsoft Sentinel KQL.
+
+Return ONLY KQL.
 
 SPL:
+
 {spl_query}
 """
 
-response = model.generate_content(prompt)
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt
+)
 
-print(response.text)
+kql = response.text
+
+with open("kql-rules/delete_diag_settings.kql", "w") as f:
+    f.write(kql)
+
+print("KQL generated successfully")
