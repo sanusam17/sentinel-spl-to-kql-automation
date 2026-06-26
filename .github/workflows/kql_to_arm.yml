@@ -1,0 +1,32 @@
+name: KQL to ARM
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "kql/*.kql"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install pyyaml
+
+      - name: Generate ARM
+        run: python scripts/kql_to_arm.py
+
+      - name: Commit ARM
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add arm/
+          git commit -m "ARM generated" || exit 0
+          git push
