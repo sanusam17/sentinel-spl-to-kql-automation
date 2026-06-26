@@ -1,4 +1,0 @@
-
-AzureActivity
-| where OperationNameValue =~ "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
-| summarize count() by Caller
