@@ -10,6 +10,12 @@ prompt_template = Path(
     "prompts/spl_to_kql.txt"
 ).read_text()
 
+# Ensure output directory exists
+Path("kql-rules").mkdir(
+    parents=True,
+    exist_ok=True
+)
+
 for spl_file in Path("spl-rules").glob("*.spl"):
 
     rule_name = spl_file.stem
@@ -34,6 +40,4 @@ for spl_file in Path("spl-rules").glob("*.spl"):
 
     output_file.write_text(response.text)
 
-    print(
-        f"Generated {output_file}"
-    )
+    print(f"Generated {output_file}")
