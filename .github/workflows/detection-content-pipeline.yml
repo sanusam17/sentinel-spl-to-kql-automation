@@ -5,6 +5,9 @@ on:
     paths:
       - 'spl-rules/*.spl'
 
+permissions:
+  contents: write
+
 jobs:
 
   spl_to_kql:
@@ -13,13 +16,24 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
+    - name: Setup Python
+      uses: actions/setup-python@v5
       with:
         python-version: "3.13"
 
-    - run: pip install -r requirements.txt
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Verify Gemini SDK
+      run: |
+        python --version
+        pip list
+        python -c "from google import genai; print('Gemini SDK Loaded Successfully')"
 
     - name: Generate KQL
       env:
@@ -29,10 +43,13 @@ jobs:
 
     - name: Commit KQL
       run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add kql-rules/*
-        git commit -m "Generated KQL" || true
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+        git add kql-rules/*.kql || true
+
+        git diff --cached --quiet || git commit -m "Generated KQL Rules"
+
         git push
 
   engineer_review:
@@ -46,7 +63,8 @@ jobs:
 
     steps:
 
-    - run: echo "Awaiting Detection Engineer Approval"
+    - name: Await Approval
+      run: echo "Awaiting Detection Engineer Approval"
 
   validate_kql:
 
@@ -56,13 +74,22 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
+    - name: Setup Python
+      uses: actions/setup-python@v5
       with:
         python-version: "3.13"
 
-    - run: pip install -r requirements.txt
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Verify Gemini SDK
+      run: |
+        python -c "from google import genai; print('Gemini SDK Loaded Successfully')"
 
     - name: Validate KQL
       env:
@@ -78,13 +105,22 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
+    - name: Setup Python
+      uses: actions/setup-python@v5
       with:
         python-version: "3.13"
 
-    - run: pip install -r requirements.txt
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Verify Gemini SDK
+      run: |
+        python -c "from google import genai; print('Gemini SDK Loaded Successfully')"
 
     - name: Generate ARM
       env:
@@ -92,10 +128,13 @@ jobs:
       run: |
         python scripts/generate_arm.py
 
-    - name: Commit ARM
+    - name: Commit ARM Templates
       run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add arm-templates/*
-        git commit -m "Generated ARM Templates" || true
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+        git add arm-templates/*.json || true
+
+        git diff --cached --quiet || git commit -m "Generated ARM Templates"
+
         git push
