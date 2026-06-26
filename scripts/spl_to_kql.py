@@ -1,9 +1,9 @@
+import os
 from google import genai
 
 client = genai.Client(
-    api_key="YOUR_GEMINI_API_KEY"
+    api_key=os.getenv("GEMINI_API_KEY")
 )
-
 with open("spl-rules/rule.spl", "r") as f:
     spl_query = f.read()
 
