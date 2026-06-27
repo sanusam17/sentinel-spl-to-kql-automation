@@ -30,7 +30,6 @@ for kql_file in kql_folder.glob("*.kql"):
 
     output_file = arm_folder / f"{kql_file.stem}.json"
 
-    print(f"Checking {kql_file.name}")
 
     # Skip if ARM already exists and KQL has not changed
     if (
