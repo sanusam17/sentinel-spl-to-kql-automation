@@ -5,7 +5,7 @@ push:
 branches:
 - main
 paths:
-- 'spl-rules/**'
+- 'spl-rules/*.spl'
 
 permissions:
 contents: write
@@ -14,8 +14,8 @@ jobs:
 convert:
 runs-on: ubuntu-latest
 
+```
 steps:
-
   - name: Checkout Repository
     uses: actions/checkout@v4
 
@@ -55,3 +55,4 @@ steps:
         git commit -m "Auto-generated KQL and ARM templates"
         git push
       fi
+```
