@@ -1,4 +1,7 @@
 name: Detection Content Pipeline
+concurrency:
+  group: detection-content
+  cancel-in-progress: false
 
 on:
   push:
@@ -12,6 +15,7 @@ permissions:
 
 jobs:
   convert:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
@@ -52,5 +56,6 @@ jobs:
             echo "No changes detected"
           else
             git commit -m "Auto-generated KQL and ARM templates"
-            git push
+            git pull --rebase origin main
+            git push origin main
           fi
