@@ -1,0 +1,81 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Log Analytics workspace."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the Log Analytics workspace."
+      }
+    },
+    "ruleName": {
+      "type": "string",
+      "defaultValue": "HighClientServerErrorCodesByIP",
+      "metadata": {
+        "description": "The name of the Scheduled Analytics Rule."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', parameters('ruleName'))]",
+      "location": "[resourceGroup().location]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "High Number of Client/Server Error Codes by IP",
+        "description": "Detects client IPs with a high number of HTTP status codes (4xx or 5xx) from AppRequests, indicating potential issues or attacks.",
+        "severity": "Medium",
+        "enabled": true,
+        "query": "AppRequests\n| project\n    trace_id = OperationId,\n    http_request_id = Id,\n    user_agent = ClientBrowser,\n    client_ip = ClientIP,\n    http_status_code = ResultCode,\n    response_time_ms = Duration\n| extend\n    status = toint(http_status_code),\n    duration = response_time_ms\n| where status >= 400\n| summarize count() by status, client_ip\n| order by count_ desc\n| limit 100",
+        "queryFrequency": "PT5M",
+        "queryPeriod": "PT5M",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "InitialAccess",
+          "Impact"
+        ],
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "alertRuleTemplateName": null,
+        "customDetails": {},
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "value": "client_ip"
+              }
+            ]
+          }
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncidents": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": ["IP"]
+          }
+        },
+        "lastModifiedUtc": "[utcNow()]",
+        "productFilter": "Azure Sentinel",
+        "techniques": [],
+        "alertDetailsOverride": null
+      }
+    }
+  ]
+}
