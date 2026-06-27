@@ -1,0 +1,13 @@
+{
+  "displayName": "Multiple Failed Login Attempts by User",
+  "description": "Detects multiple failed login attempts (Event ID 4625) for a single user account within a specified time period, indicating potential brute-force activity. This rule is based on Windows Security Events, Event ID 4625 (An account failed to log on).",
+  "severity": "High",
+  "tactics": [
+    "InitialAccess"
+  ],
+  "query": "SecurityEvent\n| where EventID == 4625\n| summarize Count = count() by TargetUserName\n| where Count > 10",
+  "queryFrequency": "PT5M",
+  "queryPeriod": "PT1H",
+  "triggerOperator": "GreaterThan",
+  "triggerThreshold": 0
+}

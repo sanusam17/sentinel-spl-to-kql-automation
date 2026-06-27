@@ -1,0 +1,14 @@
+{
+  "displayName": "Suspicious Role Assignment Write Operation",
+  "description": "Detects successful role assignment write operations in Azure Activity logs. This indicates a principal has been granted a new role, which should be monitored closely for unauthorized access or privilege escalation.",
+  "severity": "Medium",
+  "tactics": [
+    "Privilege Escalation",
+    "Persistence"
+  ],
+  "query": "AzureActivity\n| where OperationName == \"MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE\"\n| where Status == \"Succeeded\"\n| summarize count() by Caller",
+  "queryFrequency": "PT5M",
+  "queryPeriod": "PT5M",
+  "triggerOperator": "GreaterThan",
+  "triggerThreshold": 0
+}

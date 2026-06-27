@@ -1,0 +1,15 @@
+Here's the SPL query converted to KQL:
+
+```kusto
+AzureActivity
+| where OperationName == "MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE"
+| where Status == "Succeeded" // In AzureActivity, "Succeeded" is typically used for successful operations in the 'Status' field.
+| summarize count() by Caller
+```
+
+**Explanation of Changes:**
+
+1.  **`index=azure sourcetype="azure:monitor:activity"`**: In KQL, this directly maps to the `AzureActivity` table, which is where Azure Activity Log data is stored in Log Analytics workspaces.
+2.  **`OperationNameValue="MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE"`**: The field name in KQL is simply `OperationName`. The comparison uses `==`.
+3.  **`ActivityStatusValue="Success"`**: For Azure Activity Logs, the general status of an operation is typically found in the `Status` field, and a successful operation is represented by the string `"Succeeded"`.
+4.  **`| stats count by Caller`**: This aggregation translates to `| summarize count() by Caller` in KQL. `count()` is the aggregation function, and `by Caller` specifies the grouping field.

@@ -1,0 +1,34 @@
+Here's the KQL equivalent of your SPL query:
+
+```kql
+SecurityEvent
+| where EventID == 4625
+| summarize Count = count() by TargetUserName // Or SubjectUserName depending on what "Account_Name" refers to
+| where Count > 10
+```
+
+**Explanation of Changes:**
+
+1.  **`index=wineventlog` -> `SecurityEvent`**: In Azure Monitor (KQL), Windows security events are typically stored in the `SecurityEvent` table.
+2.  **`EventCode=4625` -> `where EventID == 4625`**:
+    *   `EventCode` in Splunk maps to `EventID` in KQL for Windows events.
+    *   Filtering is done using the `where` operator, and equality is `==`.
+3.  **`| stats count by Account_Name` -> `| summarize Count = count() by TargetUserName`**:
+    *   `stats` in SPL is equivalent to `summarize` in KQL for aggregation.
+    *   `count` becomes `count()`. It's good practice to rename the output column, so `Count = count()` gives it a meaningful name.
+    *   `Account_Name`: This is the trickiest part. For `EventID 4625` (successful logon), the account that successfully logged on is typically found in the `TargetUserName` field. If "Account_Name" in your Splunk environment referred to the *source* account attempting the logon, you might use `SubjectUserName` instead.
+4.  **`| where count > 10` -> `| where Count > 10`**:
+    *   The `where` operator is used similarly in KQL for filtering.
+    *   We use the renamed column `Count` from the `summarize` step.
+
+**To verify the correct account field:**
+
+If you are unsure whether `TargetUserName` or `SubjectUserName` (or another field like `Account`) is the correct equivalent for `Account_Name` in your Splunk setup, you can run a quick KQL query to inspect the schema for `EventID 4625`:
+
+```kql
+SecurityEvent
+| where EventID == 4625
+| limit 10 // Just to see a few examples
+| project TimeGenerated, TargetUserName, SubjectUserName, Account, Activity
+```
+This will help you determine which KQL field best matches your `Account_Name` in Splunk.
