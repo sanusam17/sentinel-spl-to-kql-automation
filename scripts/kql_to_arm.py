@@ -22,16 +22,25 @@ prompt_template = Path(
 
 for kql_file in kql_folder.glob("*.kql"):
 
-    output_file = arm_folder / f"{kql_file.stem}.json"
+    output_file = (
+        arm_folder /
+        f"{kql_file.stem}.json"
+    )
 
+    print(
+        f"Checking {kql_file.name}"
+    )
 
-    # Skip if ARM already exists and KQL has not changed
-   # Skip if ARM template already exists
+    # Skip if ARM template already exists
     if output_file.exists():
-        print(f"Skipping {kql_file.name}")
+        print(
+            f"Skipping {kql_file.name}"
+        )
         continue
 
-    print(f"Generating ARM for {kql_file.stem}")
+    print(
+        f"Generating ARM for {kql_file.stem}"
+    )
 
     kql_query = kql_file.read_text(
         encoding="utf-8"
@@ -48,7 +57,6 @@ for kql_file in kql_folder.glob("*.kql"):
 
     arm_json = response.text.strip()
 
-    # Remove markdown if Gemini returns it
     if arm_json.startswith("```json"):
         arm_json = arm_json.replace(
             "```json",
@@ -65,6 +73,10 @@ for kql_file in kql_folder.glob("*.kql"):
         encoding="utf-8"
     )
 
-    print(f"Generated {output_file}")
+    print(
+        f"Generated {output_file}"
+    )
 
-print("ARM template generation complete")
+print(
+    "ARM template generation complete"
+)
