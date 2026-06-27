@@ -1,6 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
+from google.genai import errors
 import os
 
 load_dotenv()
@@ -29,9 +30,7 @@ for kql_file in kql_folder.glob("*.kql"):
 
     # Skip if ARM template already exists
     if output_file.exists():
-        print(
-            f"Skipping {kql_file.name}"
-        )
+        print(f"Skipping {kql_file.name}")
         continue
 
     print(
@@ -46,10 +45,15 @@ for kql_file in kql_folder.glob("*.kql"):
         kql_query=kql_query
     )
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+    except errors.APIError as e:
+        print(f"Gemini API Error: {e}")
+        continue
 
     arm_json = response.text.strip()
 
