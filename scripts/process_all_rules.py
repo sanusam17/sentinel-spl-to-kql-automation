@@ -18,6 +18,8 @@ for spl_file in spl_folder.glob("*.spl"):
 
     output_file = kql_folder / f"{spl_file.stem}.kql"
 
+    print(f"Checking {kql_file.name}")
+
     # Skip if already converted and source file has not changed
     if (
         output_file.exists()

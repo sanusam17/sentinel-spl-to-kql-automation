@@ -8,6 +8,12 @@ load_dotenv()
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
+if not api_key:
+    raise ValueError("GEMINI_API_KEY is not set")
+
+client = genai.Client(
+    api_key=api_key
+)
 
 kql_folder = Path("kql-rules")
 arm_folder = Path("arm-templates")
@@ -23,6 +29,8 @@ prompt_template = Path(
 for kql_file in kql_folder.glob("*.kql"):
 
     output_file = arm_folder / f"{kql_file.stem}.json"
+
+    print(f"Checking {kql_file.name}")
 
     # Skip if ARM already exists and KQL has not changed
     if (
