@@ -25,9 +25,11 @@ for spl_file in spl_folder.glob("*.spl"):
 
     # Skip if KQL already exists
     if output_file.exists():
+
         print(
             f"Skipping {spl_file.name}"
         )
+
         continue
 
     print(
@@ -51,7 +53,7 @@ for spl_file in spl_folder.glob("*.spl"):
             f"Gemini API Error for {spl_file.name}: {e}"
         )
 
-        # Retry once for temporary service issues
+        # Retry once if Gemini service is temporarily unavailable
         if "503" in str(e):
 
             print(
@@ -75,11 +77,13 @@ for spl_file in spl_folder.glob("*.spl"):
 
                 continue
 
+        # Skip quota exceeded and other API errors
         else:
+
             continue
 
     output_file.write_text(
-        response.text,
+        response.text.strip(),
         encoding="utf-8"
     )
 
