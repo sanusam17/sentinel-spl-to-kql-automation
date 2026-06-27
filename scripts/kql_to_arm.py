@@ -27,10 +27,6 @@ for kql_file in kql_folder.glob("*.kql"):
         f"{kql_file.stem}.json"
     )
 
-    print(
-        f"Checking {kql_file.name}"
-    )
-
     # Skip if ARM template already exists
     if output_file.exists():
         print(
