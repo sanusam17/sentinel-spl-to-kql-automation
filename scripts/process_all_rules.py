@@ -1,16 +1,30 @@
 from pathlib import Path
-from gemini_client import generate
+from dotenv import load_dotenv
+from google import genai
+import os
 
-prompt_template = open("prompts/spl_to_kql.txt").read()
+load_dotenv()
 
-for file in Path("spl-rules").glob("*.spl"):
-    spl = file.read_text()
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
-    prompt = prompt_template.replace("{{SPL}}", spl)
+spl_folder = Path("spl-rules")
+kql_folder = Path("kql-rules")
 
-    kql = generate(prompt)
+kql_folder.mkdir(exist_ok=True)
 
-    output = Path("kql") / (file.stem + ".kql")
-    output.write_text(kql)
+for spl_file in spl_folder.glob("*.spl"):
 
-    print(f"Generated KQL: {file.name}")
+    spl_query = spl_file.read_text()
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=f"Convert this SPL query to KQL:\n\n{spl_query}"
+    )
+
+    output_file = kql_folder / f"{spl_file.stem}.kql"
+
+    output_file.write_text(response.text)
+
+    print(f"Generated {output_file}")
