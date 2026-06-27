@@ -1,58 +1,56 @@
 name: Detection Content Pipeline
 
 on:
-push:
-branches:
-- main
-paths:
-- 'spl-rules/*.spl'
+  push:
+    branches:
+      - main
+    paths:
+      - 'spl-rules/*.spl'
 
 permissions:
-contents: write
+  contents: write
 
 jobs:
-convert:
-runs-on: ubuntu-latest
+  convert:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  - name: Setup Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: '3.11'
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-  - name: Install Dependencies
-    run: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
+      - name: Convert SPL to KQL
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/process_all_rules.py
 
-  - name: Convert SPL to KQL
-    env:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-    run: |
-      python scripts/process_all_rules.py
+      - name: Convert KQL to ARM
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/kql_to_arm.py
 
-  - name: Convert KQL to ARM
-    env:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-    run: |
-      python scripts/kql_to_arm.py
+      - name: Commit Generated Files
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-  - name: Commit Generated Files
-    run: |
-      git config --global user.name "github-actions"
-      git config --global user.email "github-actions@github.com"
+          git add kql-rules/
+          git add arm-templates/
 
-      git add kql-rules/
-      git add arm-templates/
-
-      if git diff --cached --quiet; then
-        echo "No changes detected"
-      else
-        git commit -m "Auto-generated KQL and ARM templates"
-        git push
-      fi
-
+          if git diff --cached --quiet; then
+            echo "No changes detected"
+          else
+            git commit -m "Auto-generated KQL and ARM templates"
+            git push
+          fi
