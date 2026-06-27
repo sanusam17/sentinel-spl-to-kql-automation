@@ -1,0 +1,74 @@
+Here's the SPL query converted to KQL, along with explanations and common variations for table and column names:
+
+The SPL query is:
+
+```spl
+index=o365 Workload=AzureActiveDirectory ResultStatus=Success
+| stats values(ClientIP) as IPs values(Country) as Countries count by UserId
+| where mvcount(Countries) > 1
+```
+
+Let's break down the conversion:
+
+1.  **`index=o365`**: In KQL, this typically maps to a specific table. For O365 activity, it's often `OfficeActivity`. For Azure Active Directory sign-ins specifically, `SigninLogs` (or `AADSignInEventsBeta` if you're using the Sentinel solution for AAD) is more precise. We'll provide both common options.
+2.  **`Workload=AzureActiveDirectory`**: This becomes a `where` clause.
+3.  **`ResultStatus=Success`**: This also becomes a `where` clause. In KQL AAD logs, success is often indicated by `ResultType == 0` or `Status.status == "Success"`.
+4.  **`| stats values(ClientIP) as IPs values(Country) as Countries count by UserId`**:
+    *   `stats` becomes `summarize`.
+    *   `values(Field)` becomes `make_set(Field)` to create an array of unique values.
+    *   `count` remains `count()`.
+    *   `by UserId` remains `by UserId` (or a similar identity field like `UserPrincipalName`).
+5.  **`| where mvcount(Countries) > 1`**:
+    *   `where` remains `where`.
+    *   `mvcount(Countries)` (multi-value count) becomes `array_length(Countries)` in KQL, as `make_set` produces an array.
+
+---
+
+### KQL Conversion Options:
+
+#### Option 1: Using `OfficeActivity` (General O365 Logs)
+
+This is a good general table for O365 events. You might need to adjust column names (`ClientIP`, `Country`, `UserId`) based on your specific ingested schema.
+
+```kql
+OfficeActivity
+| where Workload == "AzureActiveDirectory"
+| where ResultStatus == "Success" // Common: ResultStatus, OperationResult, Status.status
+| summarize
+    IPs = make_set(ClientIP),       // Common: ClientIP, IpAddress, SourceIp
+    Countries = make_set(Country),   // Common: Country, Location, Geolocation.country, Location.countryOrRegion
+    EventCount = count()
+  by UserId                       // Common: UserId, UserPrincipalName, Identity
+| where array_length(Countries) > 1
+```
+
+#### Option 2: Using `SigninLogs` (More Specific Azure AD Sign-in Logs)
+
+This table is specifically for Azure AD sign-in events and often has more standardized column names for location and IP. This is usually the best fit if your `Workload` is "AzureActiveDirectory" and you're looking at sign-ins. You need to have Azure AD diagnostic settings configured to send `SigninLogs` to Log Analytics.
+
+```kql
+SigninLogs
+| where ResultType == 0 // 0 typically indicates a successful sign-in in SigninLogs
+| summarize
+    IPs = make_set(IPAddress),
+    Countries = make_set(Location.countryOrRegion), // Path for country in SigninLogs schema
+    EventCount = count()
+  by UserPrincipalName // Common identifier in SigninLogs
+| where array_length(Countries) > 1
+```
+
+---
+
+### Explanation of KQL Components:
+
+*   **`OfficeActivity` / `SigninLogs`**: The specific table containing your log data. Choose the one that best fits your ingested data.
+*   **`| where Workload == "AzureActiveDirectory"`**: Filters the logs to only include events from the Azure Active Directory workload.
+*   **`| where ResultStatus == "Success"` / `| where ResultType == 0`**: Filters for successful operations. The exact column and value for success depend on the specific log source.
+*   **`| summarize ... by ...`**: This is the aggregation step:
+    *   `IPs = make_set(ClientIP)`: Creates a dynamic array named `IPs` containing all unique `ClientIP` values for each `UserId`.
+    *   `Countries = make_set(Country)`: Creates a dynamic array named `Countries` containing all unique `Country` values for each `UserId`.
+    *   `EventCount = count()`: Counts the total number of events for each `UserId`.
+    *   `by UserId` / `by UserPrincipalName`: Groups the results by the user identifier.
+*   **`| where array_length(Countries) > 1`**: This is the final filtering step. It selects only those rows (users) where the `Countries` array contains more than one unique country, meaning the user had successful activity from multiple countries.
+
+Remember to verify the exact column names in your Log Analytics workspace's schema, as they can sometimes vary based on your ingestion setup. You can use `OfficeActivity | getschema` or `SigninLogs | getschema` to explore available columns.

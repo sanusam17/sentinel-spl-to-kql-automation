@@ -32,10 +32,8 @@ for kql_file in kql_folder.glob("*.kql"):
 
 
     # Skip if ARM already exists and KQL has not changed
-    if (
-        output_file.exists()
-        and output_file.stat().st_mtime >= kql_file.stat().st_mtime
-    ):
+   # Skip if ARM template already exists
+    if output_file.exists():
         print(f"Skipping {kql_file.name}")
         continue
 
