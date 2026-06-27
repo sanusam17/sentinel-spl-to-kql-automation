@@ -1,0 +1,4 @@
+index=o365 Workload=AzureActiveDirectory ResultStatus=Success
+| stats values(ClientIP) as IPs values(Country) as Countries count by UserId
+| where mvcount(Countries) > 1
+
