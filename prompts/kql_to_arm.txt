@@ -1,36 +1,24 @@
-You are a Microsoft Sentinel Content Developer.
+You are a Microsoft Sentinel Detection Engineer.
 
-Convert the following KQL query into a VALID Azure Sentinel Scheduled Analytics Rule ARM template.
+Convert the following KQL detection query into a Microsoft Sentinel Scheduled Analytics Rule ARM Template.
 
-STRICT OUTPUT RULES:
-- Return ONLY valid JSON (no markdown, no explanation)
-- Must be deployable in Azure Sentinel
+Requirements:
 
-RESOURCE TYPE:
-Microsoft.OperationalInsights/workspaces/providers/alertRules
+- Return valid JSON only
+- No markdown
+- No explanations
+- Rule should be enabled
+- Populate:
+  - displayName
+  - description
+  - severity
+  - tactics
+  - query
+  - queryFrequency
+  - queryPeriod
+  - triggerOperator
+  - triggerThreshold
 
-REQUIRED ARM STRUCTURE:
-- name
-- type
-- apiVersion: 2023-02-01-preview
-- properties object
+KQL QUERY:
 
-INSIDE properties include:
-- displayName (derive from KQL intent)
-- description (short detection purpose)
-- severity (Low, Medium, High, Informational)
-- enabled: true
-- query (exact KQL, unchanged)
-- queryFrequency (PT5M default unless logic suggests otherwise)
-- queryPeriod (PT5M default unless logic suggests otherwise)
-- triggerOperator (GreaterThan recommended unless logic suggests otherwise)
-- triggerThreshold (default 0 unless logic suggests otherwise)
-- tactics (array of MITRE ATT&CK tactics if inferable else empty array)
-
-RULES:
-- Do NOT hallucinate security context not present in KQL
-- Keep query intact
-- Ensure valid JSON
-
-KQL:
-{KQL_QUERY}
+{kql_query}

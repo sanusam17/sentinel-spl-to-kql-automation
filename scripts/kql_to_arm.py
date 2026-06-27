@@ -1,26 +1,71 @@
 from pathlib import Path
-import json
-from gemini_client import generate
+from dotenv import load_dotenv
+from google import genai
+import os
 
-PROMPT_TEMPLATE = open("prompts/kql_to_arm.txt").read()
+load_dotenv()
 
-KQL_DIR = Path("kql")
-ARM_DIR = Path("arm")
-ARM_DIR.mkdir(exist_ok=True)
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
-for file in KQL_DIR.glob("*.kql"):
-    kql = file.read_text()
+kql_folder = Path("kql-rules")
+arm_folder = Path("arm-templates")
 
-    prompt = PROMPT_TEMPLATE.replace("{KQL_QUERY}", kql)
+arm_folder.mkdir(exist_ok=True)
 
-    response = generate(prompt)
+prompt_template = Path(
+    "prompts/kql_to_arm_prompt.txt"
+).read_text(
+    encoding="utf-8"
+)
 
-    try:
-        arm_json = json.loads(response)
-    except json.JSONDecodeError:
-        raise Exception(f"Invalid JSON generated for {file.name}")
+for kql_file in kql_folder.glob("*.kql"):
 
-    output_file = ARM_DIR / f"{file.stem}.json"
-    output_file.write_text(json.dumps(arm_json, indent=2))
+    print(
+        f"Generating ARM for {kql_file.stem}"
+    )
 
-    print(f"ARM generated: {file.name}")
+    kql_query = kql_file.read_text(
+        encoding="utf-8"
+    )
+
+    prompt = prompt_template.format(
+        kql_query=kql_query
+    )
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    arm_json = response.text.strip()
+
+    if arm_json.startswith("```json"):
+        arm_json = arm_json.replace(
+            "```json",
+            ""
+        )
+
+    arm_json = arm_json.replace(
+        "```",
+        ""
+    ).strip()
+
+    output_file = (
+        arm_folder /
+        f"{kql_file.stem}.json"
+    )
+
+    output_file.write_text(
+        arm_json,
+        encoding="utf-8"
+    )
+
+    print(
+        f"Generated {output_file}"
+    )
+
+print(
+    "ARM template generation complete"
+)

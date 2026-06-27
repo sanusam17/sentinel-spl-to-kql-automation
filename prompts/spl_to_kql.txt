@@ -1,12 +1,15 @@
-You are a Microsoft Sentinel detection engineer.
+You are a Microsoft Sentinel Detection Engineer.
 
-Convert SPL to KQL.
+Convert the following Splunk SPL query to Microsoft Sentinel KQL.
 
-Rules:
-- Output ONLY KQL
-- Preserve logic exactly
-- Optimize for Microsoft Sentinel
-- No explanation
+Requirements:
 
-SPL:
-{{SPL}}
+- Preserve detection logic
+- Use native KQL operators
+- Return KQL only
+- No markdown
+- No explanations
+
+SPL Query:
+
+{spl_query}
