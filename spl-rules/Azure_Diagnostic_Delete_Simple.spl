@@ -1,0 +1,3 @@
+index=azure sourcetype="azure:activity"
+OperationNameValue="MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
+| table _time Caller CallerIpAddress ResourceGroup Resource CorrelationId
