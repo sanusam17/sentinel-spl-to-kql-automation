@@ -1,4 +1,0 @@
-index=* sourcetype=azure:activity
-OperationName="MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
-| stats count as DeletionCount by Caller, CallerIpAddress, ResourceGroup, Resource, OperationName
-| where DeletionCount > 0

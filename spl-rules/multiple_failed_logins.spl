@@ -1,4 +1,4 @@
 index=* sourcetype=azure:audit
 | where ResultType="Failure"
 | stats count by UserPrincipalName, IPAddress
-| where count >= 5
+| where count >= 8
