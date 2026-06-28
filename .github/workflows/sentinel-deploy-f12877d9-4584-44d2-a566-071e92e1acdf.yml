@@ -24,7 +24,7 @@ jobs:
       resourceGroupName: 'sentinel_shyama'
       workspaceName: 'log-analytics-shyama'
       workspaceId: 'd2ea2c2c-05d4-49cf-9462-56d89d41179b'
-      directory: '${{ github.workspace }}'
+      directory: '${{ github.workspace }}/arm-templates'
       cloudEnv: 'AzureCloud'
       contentTypes: 'AnalyticsRule,HuntingQuery,AutomationRule,Parser,Playbook,Workbook,Watchlist'
       branch: 'main'
