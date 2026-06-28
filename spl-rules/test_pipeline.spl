@@ -1,0 +1,2 @@
+index=* sourcetype=azure:audit
+| stats count by user
