@@ -1,0 +1,4 @@
+AzureActivity
+| where ActivityStatusValue == "Failure"
+| summarize EventCount = count() by Caller, CallerIpAddress
+| where EventCount >= 8
