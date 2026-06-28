@@ -7,6 +7,7 @@ import os
 import json
 import uuid
 import copy
+import time
 
 load_dotenv()
 
@@ -33,59 +34,166 @@ master_template = json.loads(
     )
 )
 
-for kql_file in kql_folder.glob("*.kql"):
+VALID_SEVERITIES = {
+    "High",
+    "Medium",
+    "Low",
+    "Informational"
+}
+
+VALID_TACTICS = {
+    "Reconnaissance",
+    "ResourceDevelopment",
+    "InitialAccess",
+    "Execution",
+    "Persistence",
+    "PrivilegeEscalation",
+    "DefenseEvasion",
+    "CredentialAccess",
+    "Discovery",
+    "LateralMovement",
+    "Collection",
+    "CommandAndControl",
+    "Exfiltration",
+    "Impact"
+}
+
+TACTIC_MAP = {
+    "Initial Access": "InitialAccess",
+    "Defense Evasion": "DefenseEvasion",
+    "Privilege Escalation": "PrivilegeEscalation",
+    "Credential Access": "CredentialAccess",
+    "Lateral Movement": "LateralMovement",
+    "Command and Control": "CommandAndControl",
+    "Resource Development": "ResourceDevelopment"
+}
+# Determine files to process
+
+changed_file_path = Path(
+    "changed_files.txt"
+)
+
+if changed_file_path.exists():
+
+    print(
+        "Using changed_files.txt"
+    )
+
+    changed_files = (
+        changed_file_path
+        .read_text(
+            encoding="utf-8"
+        )
+        .splitlines()
+    )
+
+    kql_files = []
+
+    for spl_path in changed_files:
+
+        spl_file = Path(
+            spl_path
+        )
+
+        kql_file = (
+            kql_folder /
+            f"{spl_file.stem}.kql"
+        )
+
+        if kql_file.exists():
+
+            kql_files.append(
+                kql_file
+            )
+
+    if not kql_files:
+
+        print(
+            "No changed KQL files found."
+        )
+
+        exit(0)
+
+else:
+
+    print(
+        "changed_files.txt not found. "
+        "Processing all KQL files."
+    )
+
+    kql_files = list(
+        kql_folder.glob("*.kql")
+    )
+
+# Process files
+
+for kql_file in kql_files:
+
+    print(
+        f"Generating ARM for {kql_file.stem}"
+    )
 
     output_file = (
         arm_folder /
         f"{kql_file.stem}.json"
     )
 
-    if output_file.exists():
-        print(
-            f"Skipping {kql_file.name}"
-        )
-        continue
-
-    print(
-        f"Generating ARM for {kql_file.stem}"
-    )
-
     kql_query = kql_file.read_text(
         encoding="utf-8"
     )
 
-    prompt = prompt_template.format(
-        kql_query=kql_query
+    prompt = prompt_template.replace(
+        "{kql_query}",
+        kql_query
     )
 
-    try:
+    response = None
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=prompt
-        )
+    for attempt in range(3):
 
-    except errors.APIError as e:
+        try:
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=prompt
+            )
+
+            break
+
+        except errors.APIError as e:
+
+            print(
+                f"Attempt {attempt + 1}/3 failed "
+                f"for {kql_file.name}: {e}"
+            )
+
+            wait_time = (
+                20 * (attempt + 1)
+            )
+
+            print(
+                f"Waiting {wait_time} seconds..."
+            )
+
+            time.sleep(
+                wait_time
+            )
+
+    if response is None:
 
         print(
-            f"Gemini API Error: {e}"
+            f"Failed to process "
+            f"{kql_file.name}"
         )
 
         continue
 
-    metadata_text = response.text.strip()
-
-    if metadata_text.startswith("```json"):
-
-        metadata_text = metadata_text.replace(
-            "```json",
-            ""
-        )
-
-    metadata_text = metadata_text.replace(
-        "```",
-        ""
-    ).strip()
+    metadata_text = (
+        response.text
+        .replace("```json", "")
+        .replace("```", "")
+        .strip()
+    )
 
     try:
 
@@ -96,7 +204,8 @@ for kql_file in kql_folder.glob("*.kql"):
     except Exception as e:
 
         print(
-            f"JSON Parse Error: {e}"
+            f"JSON Parse Error "
+            f"for {kql_file.name}: {e}"
         )
 
         continue
@@ -138,37 +247,67 @@ for kql_file in kql_folder.glob("*.kql"):
         ""
     )
 
-    props["severity"] = metadata.get(
+    severity = metadata.get(
         "severity",
         "Medium"
     )
 
+    if severity not in VALID_SEVERITIES:
+        severity = "Medium"
+
+    props["severity"] = severity
     props["query"] = kql_query
 
     props["queryFrequency"] = metadata.get(
         "queryFrequency",
-        "PT5M"
+        "PT1H"
     )
 
     props["queryPeriod"] = metadata.get(
         "queryPeriod",
-        "PT5M"
+        "PT1H"
+    )
+    props["triggerThreshold"] = metadata.get(
+    "triggerThreshold",
+    0
     )
 
-    props["tactics"] = metadata.get(
+    raw_tactics = metadata.get(
         "tactics",
         []
     )
 
-    props["techniques"] = metadata.get(
-        "techniques",
+    normalized_tactics = [
+        TACTIC_MAP.get(t, t)
+        for t in raw_tactics
+    ]
+
+    invalid_tactics = [
+        t for t in normalized_tactics
+        if t not in VALID_TACTICS
+    ]
+
+    if invalid_tactics:
+        print(
+            f"Invalid tactics in "
+            f"{kql_file.name}: "
+            f"{invalid_tactics}"
+        )
+        continue
+
+    props["tactics"] = normalized_tactics
+
+    techniques = metadata.get(
+    "techniques",
         []
     )
 
-    props["entityMappings"] = metadata.get(
-        "entityMappings",
-        []
-    )
+    if not isinstance(techniques, list):
+        techniques = []
+
+    props["techniques"] = techniques
+
+    props["entityMappings"] = None
 
     output_file.write_text(
         json.dumps(

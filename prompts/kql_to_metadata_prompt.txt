@@ -1,40 +1,56 @@
 You are a Microsoft Sentinel Detection Engineer.
 
-Analyze the following KQL detection query and generate ONLY a valid JSON object.
+Convert the provided KQL query into detection metadata for a Microsoft Sentinel Scheduled Analytics Rule.
 
-Return NO markdown.
-Return NO explanations.
-Return JSON only.
-
-Required format:
-
-{{
-  "displayName": "",
-  "description": "",
-  "severity": "",
-  "queryFrequency": "",
-  "queryPeriod": "",
-  "tactics": [],
-  "techniques": [],
-  "entityMappings": []
-}}
+Return ONLY valid JSON.
 
 Rules:
 
-1. Severity must be one of:
-   Informational
-   Low
-   Medium
-   High
+1. Output must be valid JSON only.
+2. Do not include markdown.
+3. Do not include explanations.
+4. Do not generate ARM templates.
+5. Do not generate entityMappings.
+6. Do not generate incidentConfiguration.
+7. Do not generate eventGroupingSettings.
+8. Do not generate alertRuleTemplateName.
+9. Do not generate templateVersion.
 
-2. queryFrequency must be ISO8601 format.
+10. Use only valid Sentinel severities:
+- High
+- Medium
+- Low
+- Informational
 
-3. queryPeriod must be ISO8601 format.
+11. Use only valid Sentinel tactics:
+- Reconnaissance
+- ResourceDevelopment
+- InitialAccess
+- Execution
+- Persistence
+- PrivilegeEscalation
+- DefenseEvasion
+- CredentialAccess
+- Discovery
+- LateralMovement
+- Collection
+- CommandAndControl
+- Exfiltration
+- Impact
 
-4. Generate MITRE ATT&CK tactics and techniques.
+Return JSON in exactly this format:
 
-5. Generate valid Microsoft Sentinel entity mappings.
+{
+  "displayName": "",
+  "description": "",
+  "severity": "Medium",
+  "queryFrequency": "PT1H",
+  "queryPeriod": "PT1H",
+  "triggerThreshold": 0,
+  "tactics": [],
+  "techniques": []
+}
 
-KQL QUERY:
+KQL Query:
 
 {kql_query}
