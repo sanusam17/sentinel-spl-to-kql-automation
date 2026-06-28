@@ -61,7 +61,7 @@ for kql_file in kql_folder.glob("*.kql"):
     try:
 
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             contents=prompt
         )
 

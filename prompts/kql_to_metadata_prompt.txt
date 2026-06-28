@@ -8,7 +8,7 @@ Return JSON only.
 
 Required format:
 
-{
+{{
   "displayName": "",
   "description": "",
   "severity": "",
@@ -17,7 +17,7 @@ Required format:
   "tactics": [],
   "techniques": [],
   "entityMappings": []
-}
+}}
 
 Rules:
 
@@ -28,11 +28,6 @@ Rules:
    High
 
 2. queryFrequency must be ISO8601 format.
-   Examples:
-   PT5M
-   PT15M
-   PT1H
-   PT24H
 
 3. queryPeriod must be ISO8601 format.
 
