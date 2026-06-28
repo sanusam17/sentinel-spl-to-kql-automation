@@ -8,14 +8,24 @@
     },
     "resources": [
         {
+<<<<<<< HEAD
             "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/47fc64c9-8d51-49d4-96e6-0f0f7ecb5e91')]",
             "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/47fc64c9-8d51-49d4-96e6-0f0f7ecb5e91')]",
+=======
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a033083b-32e2-4d4e-849e-944f260d413b')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a033083b-32e2-4d4e-849e-944f260d413b')]",
+>>>>>>> a7455ff (New Structure Deployment)
             "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
             "kind": "Scheduled",
             "apiVersion": "2023-12-01-preview",
             "properties": {
+<<<<<<< HEAD
                 "displayName": "Multiple Failed Azure Activity from same caller and IP",
                 "description": "Detects instances where the same caller has made 8 or more failed Azure activities from the same IP address within the last hour. This could indicate brute-force attempts or misconfigurations.",
+=======
+                "displayName": "Multiple Failed Azure Activity by Caller",
+                "description": "Detects multiple failed Azure activities originating from the same caller and IP address within a short period, which could indicate brute-force attempts or misconfigurations.",
+>>>>>>> a7455ff (New Structure Deployment)
                 "severity": "Medium",
                 "enabled": true,
                 "query": "AzureActivity\n| where ActivityStatus == \"Failed\"\n| summarize count() by Caller, CallerIpAddress\n| where count_ >= 8",
@@ -28,6 +38,7 @@
                 "startTimeUtc": null,
                 "tactics": [
                     "InitialAccess",
+<<<<<<< HEAD
                     "Execution",
                     "Persistence",
                     "PrivilegeEscalation",
@@ -41,6 +52,12 @@
                     "Impact"
                 ],
                 "techniques": [
+=======
+                    "CredentialAccess"
+                ],
+                "techniques": [
+                    "T1078",
+>>>>>>> a7455ff (New Structure Deployment)
                     "T1110"
                 ],
                 "subTechniques": [],
