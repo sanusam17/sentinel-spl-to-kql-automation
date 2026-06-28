@@ -1,4 +1,0 @@
-index=azure sourcetype="azure:monitor:activity"
-OperationNameValue="MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE"
-ActivityStatusValue="Success"
-| stats count by Caller

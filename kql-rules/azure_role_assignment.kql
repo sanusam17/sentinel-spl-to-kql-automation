@@ -1,3 +1,0 @@
-AzureActivity
-| where OperationNameValue == "MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE" and ActivityStatusValue == "Success"
-| summarize count() by Caller

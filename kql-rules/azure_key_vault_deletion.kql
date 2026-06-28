@@ -1,4 +1,0 @@
-AzureActivity
-| where OperationNameValue == "MICROSOFT.KEYVAULT/VAULTS/DELETE"
-| where ActivityStatusValue == "Success"
-| summarize count() by Caller, ResourceGroup, ResourceId, CallerIpAddress

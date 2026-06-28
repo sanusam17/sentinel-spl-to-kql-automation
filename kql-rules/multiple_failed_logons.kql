@@ -1,4 +1,0 @@
-SecurityEvent
-| where EventID == 4625
-| summarize count() by TargetAccount
-| where count_ > 10

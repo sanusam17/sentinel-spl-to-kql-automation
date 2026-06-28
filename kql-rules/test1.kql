@@ -1,4 +1,0 @@
-AzureActivity
-| where OperationNameValue == "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
-| where ActivityStatusValue == "Success"
-| summarize count() by Caller, ResourceGroup
