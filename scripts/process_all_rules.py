@@ -16,8 +16,20 @@ kql_folder = Path("kql-rules")
 
 kql_folder.mkdir(exist_ok=True)
 
-for spl_file in spl_folder.glob("*.spl"):
+changed_files = Path(
+    "changed_files.txt"
+).read_text().splitlines()
 
+for file_path in changed_files:
+
+    spl_file = Path(file_path)
+
+    if not spl_file.exists():
+        continue
+
+    print(
+        f"Processing {spl_file.name}"
+    )
     output_file = (
         kql_folder /
         f"{spl_file.stem}.kql"

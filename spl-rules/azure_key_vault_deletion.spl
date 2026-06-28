@@ -1,4 +1,4 @@
 index=azure sourcetype="azure:monitor:activity"
 OperationNameValue="MICROSOFT.KEYVAULT/VAULTS/DELETE"
 ActivityStatusValue="Success"
-| stats count by Caller, ResourceGroup, ResourceId
+| stats count by Caller, ResourceGroup, ResourceId,ClientIP
