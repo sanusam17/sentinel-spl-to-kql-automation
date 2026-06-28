@@ -1,4 +1,0 @@
-AzureActivity
-| where ActivityStatus == "Failed"
-| summarize count() by Caller, CallerIpAddress
-| where count_ >= 8

@@ -38,6 +38,10 @@ Rules:
 - Exfiltration
 - Impact
 
+Select only the most relevant MITRE ATT&CK tactics.
+Do not include more than 3 tactics.
+Prefer the smallest set of tactics that accurately describe the detection.
+
 Return JSON in exactly this format:
 
 {

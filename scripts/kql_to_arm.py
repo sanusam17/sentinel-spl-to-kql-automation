@@ -219,8 +219,11 @@ for kql_file in kql_files:
     props = resource["properties"]
 
     rule_guid = str(
-        uuid.uuid4()
+    uuid.uuid5(
+        uuid.NAMESPACE_DNS,
+        kql_file.stem
     )
+)
 
     resource["id"] = (
         "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', "
