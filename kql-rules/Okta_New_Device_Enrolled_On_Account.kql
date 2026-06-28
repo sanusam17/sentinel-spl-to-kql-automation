@@ -1,0 +1,13 @@
+Okta_CL
+| where eventType_s == "device.lifecycle.enroll"
+| summarize
+    Count = count(),
+    LastTime = max(TimeGenerated),
+    FirstTime = min(TimeGenerated)
+  by
+    bin(TimeGenerated, 5m),
+    actor_alternateId_s,
+    outcome_result_s,
+    eventType_s,
+    client_ipAddress_s,
+    target_displayName_s

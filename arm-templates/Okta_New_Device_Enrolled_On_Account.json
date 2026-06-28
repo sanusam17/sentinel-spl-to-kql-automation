@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/22958587-e95b-5447-bd97-924a86c85125')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/22958587-e95b-5447-bd97-924a86c85125')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2023-12-01-preview",
+            "properties": {
+                "displayName": "Okta Device Lifecycle Enroll Event",
+                "description": "Detects events related to device enrollment in Okta.",
+                "severity": "Informational",
+                "enabled": true,
+                "query": "Okta_CL\n| where eventType_s == \"device.lifecycle.enroll\"\n| summarize\n    Count = count(),\n    LastTime = max(TimeGenerated),\n    FirstTime = min(TimeGenerated)\n  by\n    bin(TimeGenerated, 5m),\n    actor_alternateId_s,\n    outcome_result_s,\n    eventType_s,\n    client_ipAddress_s,\n    target_displayName_s",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "startTimeUtc": null,
+                "tactics": [
+                    "Discovery",
+                    "InitialAccess"
+                ],
+                "techniques": [
+                    "T1087"
+                ],
+                "subTechniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {},
+                "entityMappings": null,
+                "sentinelEntitiesMappings": null,
+                "templateVersion": null
+            }
+        }
+    ]
+}
