@@ -2,7 +2,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors
+
 import os
+import json
+import uuid
+import copy
 
 load_dotenv()
 
@@ -16,9 +20,17 @@ arm_folder = Path("arm-templates")
 arm_folder.mkdir(exist_ok=True)
 
 prompt_template = Path(
-    "prompts/kql_to_arm_prompt.txt"
+    "prompts/kql_to_metadata_prompt.txt"
 ).read_text(
     encoding="utf-8"
+)
+
+master_template = json.loads(
+    Path(
+        "templates/sentinel_master_template.json"
+    ).read_text(
+        encoding="utf-8"
+    )
 )
 
 for kql_file in kql_folder.glob("*.kql"):
@@ -28,9 +40,10 @@ for kql_file in kql_folder.glob("*.kql"):
         f"{kql_file.stem}.json"
     )
 
-    # Skip if ARM template already exists
     if output_file.exists():
-        print(f"Skipping {kql_file.name}")
+        print(
+            f"Skipping {kql_file.name}"
+        )
         continue
 
     print(
@@ -46,30 +59,122 @@ for kql_file in kql_folder.glob("*.kql"):
     )
 
     try:
+
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
 
     except errors.APIError as e:
-        print(f"Gemini API Error: {e}")
+
+        print(
+            f"Gemini API Error: {e}"
+        )
+
         continue
 
-    arm_json = response.text.strip()
+    metadata_text = response.text.strip()
 
-    if arm_json.startswith("```json"):
-        arm_json = arm_json.replace(
+    if metadata_text.startswith("```json"):
+
+        metadata_text = metadata_text.replace(
             "```json",
             ""
         )
 
-    arm_json = arm_json.replace(
+    metadata_text = metadata_text.replace(
         "```",
         ""
     ).strip()
 
+    try:
+
+        metadata = json.loads(
+            metadata_text
+        )
+
+    except Exception as e:
+
+        print(
+            f"JSON Parse Error: {e}"
+        )
+
+        continue
+
+    arm = copy.deepcopy(
+        master_template
+    )
+
+    resource = arm["resources"][0]
+
+    props = resource["properties"]
+
+    rule_guid = str(
+        uuid.uuid4()
+    )
+
+    resource["id"] = (
+        "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', "
+        "parameters('workspace'), "
+        "'Microsoft.SecurityInsights'),'/alertRules/"
+        + rule_guid +
+        "')]"
+    )
+
+    resource["name"] = (
+        "[concat(parameters('workspace'),"
+        "'/Microsoft.SecurityInsights/"
+        + rule_guid +
+        "')]"
+    )
+
+    props["displayName"] = metadata.get(
+        "displayName",
+        kql_file.stem
+    )
+
+    props["description"] = metadata.get(
+        "description",
+        ""
+    )
+
+    props["severity"] = metadata.get(
+        "severity",
+        "Medium"
+    )
+
+    props["query"] = kql_query
+
+    props["queryFrequency"] = metadata.get(
+        "queryFrequency",
+        "PT5M"
+    )
+
+    props["queryPeriod"] = metadata.get(
+        "queryPeriod",
+        "PT5M"
+    )
+
+    props["tactics"] = metadata.get(
+        "tactics",
+        []
+    )
+
+    props["techniques"] = metadata.get(
+        "techniques",
+        []
+    )
+
+    props["entityMappings"] = metadata.get(
+        "entityMappings",
+        []
+    )
+
     output_file.write_text(
-        arm_json,
+        json.dumps(
+            arm,
+            indent=4
+        ),
         encoding="utf-8"
     )
 
