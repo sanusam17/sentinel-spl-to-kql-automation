@@ -1,0 +1,4 @@
+AzureActivity
+| where OperationName == "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE"
+| summarize DeletionCount = count() by Caller, CallerIpAddress, ResourceGroup, Resource, OperationName
+| where DeletionCount > 0

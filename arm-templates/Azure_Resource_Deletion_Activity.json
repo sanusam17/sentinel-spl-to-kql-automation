@@ -1,0 +1,93 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a346736e-523f-4fa2-856a-cce4322b524e')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a346736e-523f-4fa2-856a-cce4322b524e')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2022-11-01-preview",
+            "properties": {
+                "displayName": "Deletion of Diagnostic Settings",
+                "description": "Detects when diagnostic settings are deleted on Azure resources. This could be an attacker attempting to cover their tracks by disabling logging for a compromised resource.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "AzureActivity\n| where OperationName == \"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE\"\n| summarize DeletionCount = count() by Caller, CallerIpAddress, ResourceGroup, Resource, OperationName\n| where DeletionCount > 0",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "startTimeUtc": null,
+                "tactics": [
+                    "Defense Evasion"
+                ],
+                "techniques": [
+                    "T1562"
+                ],
+                "alertRuleTemplateName": "6e95aef3-a1e0-4063-8e74-cd59aa59f245",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "Selected",
+                        "groupByEntities": [
+                            "Account"
+                        ],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "source": "Caller",
+                                "displayName": "Account"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "source": "CallerIpAddress",
+                                "displayName": "IP Address"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "AzureResource",
+                        "fieldMappings": [
+                            {
+                                "source": "ResourceGroup",
+                                "displayName": "Resource Group"
+                            },
+                            {
+                                "source": "Resource",
+                                "displayName": "Resource Name"
+                            }
+                        ]
+                    }
+                ],
+                "sentinelEntitiesMappings": null,
+                "templateVersion": "1.0.2"
+            }
+        }
+    ]
+}
