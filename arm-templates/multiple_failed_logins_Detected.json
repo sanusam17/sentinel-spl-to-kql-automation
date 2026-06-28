@@ -28,7 +28,7 @@
                 "startTimeUtc": null,
                 "tactics": [
                     "CredentialAccess",
-                    "Discovery"
+                    "Persistence"
                 ],
                 "techniques": [
                     "T1078"
