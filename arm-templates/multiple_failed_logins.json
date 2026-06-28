@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/47fc64c9-8d51-49d4-96e6-0f0f7ecb5e91')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/47fc64c9-8d51-49d4-96e6-0f0f7ecb5e91')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2023-12-01-preview",
+            "properties": {
+                "displayName": "Multiple Failed Azure Activity from same caller and IP",
+                "description": "Detects instances where the same caller has made 8 or more failed Azure activities from the same IP address within the last hour. This could indicate brute-force attempts or misconfigurations.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "AzureActivity\n| where ActivityStatus == \"Failed\"\n| summarize count() by Caller, CallerIpAddress\n| where count_ >= 8",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "startTimeUtc": null,
+                "tactics": [
+                    "InitialAccess",
+                    "Execution",
+                    "Persistence",
+                    "PrivilegeEscalation",
+                    "DefenseEvasion",
+                    "CredentialAccess",
+                    "Discovery",
+                    "LateralMovement",
+                    "Collection",
+                    "CommandAndControl",
+                    "Exfiltration",
+                    "Impact"
+                ],
+                "techniques": [
+                    "T1110"
+                ],
+                "subTechniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {},
+                "entityMappings": null,
+                "sentinelEntitiesMappings": null,
+                "templateVersion": null
+            }
+        }
+    ]
+}
