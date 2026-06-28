@@ -1,0 +1,2 @@
+AzureActivity
+| summarize count() by Caller
